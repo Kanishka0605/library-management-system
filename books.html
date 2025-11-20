@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Borrowed Books</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5ebe0 0%, #e3d5ca 50%, #d5bdaf 100%);
+            background-attachment: fixed;
+            min-height: 100vh;
+            padding: 30px 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 40px 40px;
+            animation: movePattern 15s linear infinite;
+            pointer-events: none;
+        }
+
+        @keyframes movePattern {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(40px, 40px); }
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 253, 250, 0.98);
+            backdrop-filter: blur(10px);
+            padding: 40px;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(139, 94, 60, 0.25), 0 0 0 1px rgba(183, 122, 64, 0.1);
+            animation: fadeIn 0.6s ease-out;
+            position: relative;
+            z-index: 1;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        h1 {
+            color: #1a1a2e;
+            font-size: 32px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .student-info {
+            color: #6b7280;
+            font-size: 14px;
+            margin-bottom: 12px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .student-info::before {
+            content: '👤';
+            font-size: 16px;
+        }
+
+        .logout-btn {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #b77a40 0%, #a06835 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 12px rgba(183, 122, 64, 0.3);
+            letter-spacing: 0.3px;
+        }
+
+        .logout-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(183, 122, 64, 0.4);
+        }
+
+        .logout-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 8px rgba(183, 122, 64, 0.3);
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: 20px;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        th {
+            background: linear-gradient(135deg, #b77a40 0%, #a06835 100%);
+            color: white;
+            padding: 18px 20px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 14px;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        td {
+            padding: 18px 20px;
+            border-bottom: 1px solid #f3f4f6;
+            transition: all 0.3s ease;
+            font-size: 15px;
+            color: #374151;
+        }
+
+        tbody tr {
+            background: white;
+            transition: all 0.3s ease;
+        }
+
+        tbody tr:hover {
+            background-color: #f9fafb;
+            transform: scale(1.005);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .overdue {
+            background: linear-gradient(to right, #fef2f2 0%, #fee2e2 100%) !important;
+            border-left: 4px solid #dc2626;
+        }
+
+        .overdue td {
+            color: #991b1b;
+            font-weight: 600;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4);
+            }
+            50% {
+                box-shadow: 0 0 0 8px rgba(220, 38, 38, 0);
+            }
+        }
+
+        .overdue:hover {
+            animation: pulse 2s infinite;
+        }
+
+        .near-due {
+            background: linear-gradient(to right, #fffbeb 0%, #fef3c7 100%) !important;
+            border-left: 4px solid #f59e0b;
+        }
+
+        .near-due td {
+            color: #92400e;
+            font-weight: 600;
+        }
+
+        .fine {
+            font-weight: 700;
+        }
+
+        .legend {
+            display: flex;
+            gap: 24px;
+            margin-top: 24px;
+            flex-wrap: wrap;
+            font-size: 13px;
+            padding: 20px;
+            background: #faf8f3;
+            border-radius: 12px;
+            border: 1px solid #e8dfd5;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 500;
+            color: #374151;
+        }
+
+        .legend-box {
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .legend-overdue {
+            background: linear-gradient(135deg, #fef2f2, #fee2e2);
+            border: 2px solid #dc2626;
+        }
+
+        .legend-near-due {
+            background: linear-gradient(135deg, #fffbeb, #fef3c7);
+            border: 2px solid #f59e0b;
+        }
+
+        .legend-normal {
+            background: white;
+            border: 2px solid #e5e7eb;
+        }
+
+        .no-books {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+            font-size: 16px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 22px;
+            }
+
+            table {
+                font-size: 14px;
+            }
+
+            th, td {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="student-info" id="studentInfo"></div>
+        <header>
+            <h1>📚 Your Borrowed Books</h1>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </header>
+
+        <div style="display:flex;gap:12px;align-items:center;margin-bottom:12px;flex-wrap:wrap;">
+            <div style="flex:1;min-width:220px;">
+                <input id="searchInput" placeholder="Search books..." style="width:100%;padding:8px;border:1px solid #ddd;border-radius:6px;" />
+            </div>
+            <div>
+                <select id="sortSelect" style="padding:8px;border-radius:6px;border:1px solid #ddd;">
+                    <option value="date_asc">Sort: Return date ↑</option>
+                    <option value="date_desc">Sort: Return date ↓</option>
+                    <option value="title_asc">Sort: Title A→Z</option>
+                    <option value="title_desc">Sort: Title Z→A</option>
+                </select>
+            </div>
+            <div id="progressWrap" style="min-width:200px;">
+                <div style="font-size:13px;color:#555;margin-bottom:6px;">Borrowed: <span id="borrowCount">0</span>/<span id="borrowLimit">10</span></div>
+                <div style="background:#f1f3f5;border-radius:6px;height:10px;overflow:hidden;">
+                    <div id="progressBar" style="height:100%;width:0%;background:linear-gradient(90deg,#b77a40,#a06835);"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table id="booksTable">
+                <thead>
+                    <tr>
+                        <th>Book Name</th>
+                        <th>Return Date</th>
+                        <th>Days Left</th>
+                        <th>Fine</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="booksTableBody">
+                    <!-- Books will be inserted here by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-box legend-overdue"></div>
+                <span>Overdue (Past return date)</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-box legend-near-due"></div>
+                <span>Near Due (Within 3 days)</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-box legend-normal"></div>
+                <span>On Time</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Check if user is logged in by presence of JWT token
+        function getAuthToken() {
+            return localStorage.getItem('authToken');
+        }
+
+        // API base
+        const API_BASE = 'http://localhost:4000/api';
+
+        // Fetch books from backend for authenticated user
+        async function fetchBooksFromServer() {
+            const token = getAuthToken();
+            if (!token) return null;
+            const res = await fetch(API_BASE + '/books', {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            return res.json();
+        }
+
+        // Calculate days difference between today and return date
+        function getDaysDifference(dateString) {
+            const returnDate = new Date(dateString);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            returnDate.setHours(0, 0, 0, 0);
+            
+            const diffTime = returnDate - today;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            return diffDays;
+        }
+
+        // Calculate fine for overdue books
+        function calculateFine(daysOverdue) {
+            if (daysOverdue <= 0) {
+                return 0;
+            }
+            return daysOverdue * 0.50; // $0.50 per day
+        }
+
+        // Render books in the table
+        async function renderBooks() {
+            const tableBody = document.getElementById('booksTableBody');
+            tableBody.innerHTML = '';
+
+            const token = getAuthToken();
+            if (!token) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const res = await fetchBooksFromServer();
+            if (!res || !res.success) {
+                tableBody.innerHTML = '<tr><td colspan="5" class="no-books">Unable to load books or not authenticated</td></tr>';
+                return;
+            }
+
+            let books = res.data || [];
+            if (books.length === 0) {
+                 tableBody.innerHTML = '<tr><td colspan="5" class="no-books">No borrowed books found</td></tr>';
+                return;
+            }
+
+            // Apply search filter
+            const search = (document.getElementById('searchInput') && document.getElementById('searchInput').value || '').toLowerCase();
+            if (search) {
+                books = books.filter(b => (b.title || '').toLowerCase().includes(search));
+            }
+
+            // Apply sorting
+            const sortVal = document.getElementById('sortSelect') ? document.getElementById('sortSelect').value : 'date_asc';
+            if (sortVal === 'date_asc') books.sort((a,b) => new Date(a.returnDate) - new Date(b.returnDate));
+            if (sortVal === 'date_desc') books.sort((a,b) => new Date(b.returnDate) - new Date(a.returnDate));
+            if (sortVal === 'title_asc') books.sort((a,b) => (a.title||'').localeCompare(b.title||''));
+            if (sortVal === 'title_desc') books.sort((a,b) => (b.title||'').localeCompare(a.title||''));
+
+            books.forEach(book => {
+                const row = document.createElement('tr');
+                const daysDiff = getDaysDifference(book.returnDate);
+                
+                let rowClass = '';
+                let fineAmount = book.fine || 0;
+
+                // Determine row status based on return date
+                if (daysDiff < 0) {
+                    // Overdue - highlight in RED
+                    rowClass = 'overdue';
+                    const daysOverdue = Math.abs(daysDiff);
+                    const calculatedFine = calculateFine(daysOverdue);
+                    fineAmount = Math.max(fineAmount, calculatedFine);
+                } else if (daysDiff <= 3) {
+                    // Near due (within 3 days) - highlight in YELLOW
+                    rowClass = 'near-due';
+                }
+
+                row.className = rowClass;
+                
+                row.innerHTML = `
+                    <td style="display:flex;align-items:center;gap:10px;">
+                        <div style="width:36px;height:36px;border-radius:6px;background:#f1f3f5;display:flex;align-items:center;justify-content:center;font-weight:600;color:#666">${(book.title||'').split(' ').slice(0,2).map(s=>s[0]).join('').toUpperCase()}</div>
+                        <div>${book.title}</div>
+                    </td>
+                    <td>${new Date(book.returnDate).toISOString().slice(0,10)}</td>
+                    <td>${daysDiff < 0 ? '<span style="color:#c0392b;font-weight:700">Overdue</span>' : daysDiff + ' day(s)'}</td>
+                    <td class="fine">$${Number(fineAmount).toFixed(2)}</td>
+                    <td><button class="logout-btn" style="background:#e74c3c;padding:6px 10px;border-radius:6px;" data-id="${book._id}">Return</button></td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+
+            // Update progress bar and counts
+            const total = res.data.length;
+            const borrowCountEl = document.getElementById('borrowCount');
+            const borrowLimitEl = document.getElementById('borrowLimit');
+            const progressBar = document.getElementById('progressBar');
+            borrowCountEl.textContent = total;
+            borrowLimitEl.textContent = 10;
+            const pct = Math.min(100, Math.round((total/10)*100));
+            progressBar.style.width = pct + '%';
+
+            // Attach return handlers
+            tableBody.querySelectorAll('button[data-id]').forEach(btn=>{
+                btn.addEventListener('click', async function(){
+                    const id = this.dataset.id;
+                    if (!confirm('Return this book?')) return;
+                    try{
+                        const token = getAuthToken();
+                        const resp = await fetch(API_BASE + '/books/' + id, { method: 'DELETE', headers: { 'Authorization': 'Bearer ' + token } });
+                        const body = await resp.json();
+                        if (body && body.success) {
+                            renderBooks();
+                        } else {
+                            alert(body.message || 'Unable to return book');
+                        }
+                    } catch(err) { console.error(err); alert('Network error'); }
+                });
+            });
+
+            // Notify user about overdue books (browser notifications)
+            notifyOverdue(res.data);
+        }
+
+        // Request permission and show Notification for overdue books
+        function notifyOverdue(allBooks) {
+            if (!('Notification' in window)) return;
+            const overdue = (allBooks || []).filter(b => getDaysDifference(b.returnDate) < 0);
+            if (overdue.length === 0) return;
+            if (Notification.permission === 'granted') {
+                new Notification('Library: Overdue Books', { body: `You have ${overdue.length} overdue book(s).` });
+            } else if (Notification.permission !== 'denied') {
+                Notification.requestPermission().then(p => { if (p === 'granted') new Notification('Library: Overdue Books', { body: `You have ${overdue.length} overdue book(s).` }); });
+            }
+        }
+
+        // Logout function
+        function logout() {
+            // Remove auth token and logged-in student from localStorage
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('loggedInStudent');
+            // Redirect to login page
+            window.location.href = 'login.html';
+        }
+
+        // Initialize page
+        function initializePage() {
+            // Check authentication via token
+            const token = getAuthToken();
+            if (!token) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Display student info (if available)
+            const studentId = localStorage.getItem('loggedInStudent') || '';
+            if (studentId) document.getElementById('studentInfo').textContent = `Logged in as: ${studentId}`;
+
+            // Add a simple add-book form above the table
+            const container = document.querySelector('.container');
+            const addForm = document.createElement('div');
+            addForm.style.marginBottom = '16px';
+            addForm.innerHTML = `
+                <form id="addBookForm" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+                    <input type="text" id="bookTitle" placeholder="Book title" style="flex:1;padding:8px;border:1px solid #ddd;border-radius:4px;" required />
+                    <input type="date" id="bookReturn" style="padding:8px;border:1px solid #ddd;border-radius:4px;" required />
+                    <input type="number" id="bookFine" placeholder="Fine (0)" min="0" step="0.01" style="width:110px;padding:8px;border:1px solid #ddd;border-radius:4px;" />
+                    <button type="submit" class="logout-btn" style="padding:8px 12px;">Add</button>
+                </form>
+            `;
+            container.insertBefore(addForm, container.children[2]);
+
+            document.getElementById('addBookForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const title = document.getElementById('bookTitle').value.trim();
+                const returnDate = document.getElementById('bookReturn').value;
+                const fine = parseFloat(document.getElementById('bookFine').value) || 0;
+
+                if (!title || !returnDate) return;
+
+                const token = getAuthToken();
+                try {
+                    const res = await fetch(API_BASE + '/books/add', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+                        body: JSON.stringify({ title, returnDate, fine })
+                    });
+                    const body = await res.json();
+                    if (body && body.success) {
+                        // clear form and re-render
+                        document.getElementById('bookTitle').value = '';
+                        document.getElementById('bookReturn').value = '';
+                        document.getElementById('bookFine').value = '';
+                        renderBooks();
+                    } else {
+                        alert(body.message || 'Unable to add book');
+                    }
+                } catch (err) {
+                    console.error(err);
+                    alert('Network error');
+                }
+            });
+
+            // --- Search and Sort listeners ---
+            // Debounce helper to avoid excessive requests while typing
+            function debounce(fn, delay) {
+                let t;
+                return function(...args) {
+                    clearTimeout(t);
+                    t = setTimeout(() => fn.apply(this, args), delay);
+                };
+            }
+
+            const searchInput = document.getElementById('searchInput');
+            const sortSelect = document.getElementById('sortSelect');
+
+            if (searchInput) {
+                searchInput.addEventListener('input', debounce(() => {
+                    renderBooks();
+                }, 250));
+            }
+
+            if (sortSelect) {
+                sortSelect.addEventListener('change', () => {
+                    renderBooks();
+                });
+            }
+
+            // Render books
+            renderBooks();
+        }
+
+        // Run on page load
+        initializePage();
+    </script>
+</body>
+</html>

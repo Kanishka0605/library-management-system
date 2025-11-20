@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Library Login</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5ebe0 0%, #e3d5ca 50%, #d5bdaf 100%);
+            background-attachment: fixed;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: moveBackground 20s linear infinite;
+        }
+
+        @keyframes moveBackground {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        .login-container {
+            background: rgba(255, 253, 250, 0.98);
+            backdrop-filter: blur(10px);
+            padding: 50px 45px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(139, 94, 60, 0.25), 0 0 0 1px rgba(183, 122, 64, 0.1);
+            width: 100%;
+            max-width: 440px;
+            animation: fadeIn 0.6s ease-out;
+            position: relative;
+            z-index: 1;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            text-align: center;
+            color: #1a1a2e;
+            margin-bottom: 10px;
+            font-size: 32px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #6b7280;
+            font-size: 14px;
+            margin-bottom: 35px;
+            font-weight: 400;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #374151;
+            font-weight: 600;
+            font-size: 14px;
+            letter-spacing: 0.2px;
+        }
+
+        input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            background: #fafafa;
+            color: #1a1a2e;
+            font-weight: 400;
+        }
+
+        input::placeholder {
+            color: #9ca3af;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #b77a40;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(183, 122, 64, 0.1), 0 4px 12px rgba(183, 122, 64, 0.15);
+        }
+
+        .error-message {
+            color: #dc2626;
+            font-size: 14px;
+            margin-top: 10px;
+            padding: 12px 16px;
+            background-color: #fef2f2;
+            border-left: 4px solid #dc2626;
+            border-radius: 8px;
+            display: none;
+            animation: shake 0.3s ease;
+            font-weight: 500;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #b77a40 0%, #a06835 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-top: 10px;
+            box-shadow: 0 4px 12px rgba(183, 122, 64, 0.3);
+            letter-spacing: 0.3px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(183, 122, 64, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 8px rgba(183, 122, 64, 0.3);
+        }
+
+        .success-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .success-message {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            text-align: center;
+            animation: successPop 0.5s ease;
+        }
+
+        @keyframes successPop {
+            0% {
+                opacity: 0;
+                transform: scale(0.5);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .success-message h2 {
+            color: #27ae60;
+            margin-bottom: 10px;
+        }
+
+        .checkmark {
+            font-size: 60px;
+            color: #27ae60;
+            animation: checkmarkBounce 0.6s ease;
+        }
+
+        @keyframes checkmarkBounce {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h1>📚 Library Login</h1>
+        <p class="subtitle">Access your personal library account</p>
+        <form id="authForm">
+            <div class="form-group">
+                <label for="studentId">Student ID</label>
+                <input type="text" id="studentId" placeholder="Enter your Student ID">
+            </div>
+            <div class="form-group">
+                <label for="name">Name (for registration)</label>
+                <input type="text" id="name" placeholder="Optional: Your name">
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" placeholder="Enter your Password">
+            </div>
+            <div class="error-message" id="errorMessage">
+                Please fill in all required fields
+            </div>
+            <button type="submit" id="submitBtn">Login</button>
+            <p style="text-align:center;margin-top:12px;font-size:14px;color:#666;"> 
+                <a href="#" id="toggleMode">Create an account</a>
+            </p>
+        </form>
+    </div>
+
+    <div class="success-overlay" id="successOverlay">
+        <div class="success-message">
+            <div class="checkmark">✓</div>
+            <h2>Login Successful!</h2>
+            <p>Redirecting to your books...</p>
+        </div>
+    </div>
+
+    <script>
+        // Frontend communicates with backend via these endpoints
+        const API_BASE = 'http://localhost:4000/api';
+
+        const authForm = document.getElementById('authForm');
+        const studentIdInput = document.getElementById('studentId');
+        const nameInput = document.getElementById('name');
+        const passwordInput = document.getElementById('password');
+        const errorMessage = document.getElementById('errorMessage');
+        const successOverlay = document.getElementById('successOverlay');
+        const submitBtn = document.getElementById('submitBtn');
+        const toggleModeLink = document.getElementById('toggleMode');
+
+        // Mode: 'login' or 'register'
+        let mode = 'login';
+
+        function setMode(m) {
+            mode = m;
+            if (mode === 'login') {
+                submitBtn.textContent = 'Login';
+                toggleModeLink.textContent = 'Create an account';
+                nameInput.style.display = 'block';
+                nameInput.placeholder = 'Optional: Your name';
+            } else {
+                submitBtn.textContent = 'Register';
+                toggleModeLink.textContent = 'Have an account? Login';
+                nameInput.style.display = 'block';
+                nameInput.placeholder = 'Your name (optional)';
+            }
+            errorMessage.style.display = 'none';
+        }
+
+        toggleModeLink.addEventListener('click', function (e) {
+            e.preventDefault();
+            setMode(mode === 'login' ? 'register' : 'login');
+        });
+
+        // Clear error when user starts typing
+        [studentIdInput, passwordInput, nameInput].forEach(el => {
+            el.addEventListener('input', function() {
+                errorMessage.style.display = 'none';
+            });
+        });
+
+        async function doLogin(studentId, password) {
+            const res = await fetch(API_BASE + '/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ studentId, password })
+            });
+            return res.json();
+        }
+
+        async function doRegister(studentId, password, name) {
+            const res = await fetch(API_BASE + '/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ studentId, password, name })
+            });
+            return res.json();
+        }
+
+        authForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const studentId = studentIdInput.value.trim();
+            const password = passwordInput.value.trim();
+            const name = nameInput.value.trim();
+
+            if (!studentId || !password) {
+                errorMessage.textContent = 'Student ID and password are required';
+                errorMessage.style.display = 'block';
+                return;
+            }
+
+            try {
+                if (mode === 'register') {
+                    const reg = await doRegister(studentId, password, name);
+                    if (!reg.success) {
+                        errorMessage.textContent = reg.message || 'Registration failed';
+                        errorMessage.style.display = 'block';
+                        return;
+                    }
+                    // After successful registration, auto-login
+                }
+
+                const result = await doLogin(studentId, password);
+                if (!result.success) {
+                    errorMessage.textContent = result.message || 'Login failed';
+                    errorMessage.style.display = 'block';
+                    return;
+                }
+
+                const token = result.data.token;
+                // Save token and studentId
+                localStorage.setItem('authToken', token);
+                localStorage.setItem('loggedInStudent', studentId);
+
+                // Show success animation
+                errorMessage.style.display = 'none';
+                successOverlay.style.display = 'flex';
+
+                // Redirect to books.html after animation
+                setTimeout(function() {
+                    window.location.href = 'books.html';
+                }, 1200);
+            } catch (err) {
+                console.error(err);
+                errorMessage.textContent = 'Network or server error';
+                errorMessage.style.display = 'block';
+            }
+        });
+
+        // initialize UI mode
+        setMode('login');
+    </script>
+</body>
+</html>
